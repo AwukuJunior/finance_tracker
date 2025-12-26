@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Personal Finance Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link href="styles.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">₵</div>
+        <h1>Finance Dashboard</h1>
+      </div>
+      <div class="header-actions">
+        <button id="themeToggle" aria-label="Toggle theme">Dark Mode</button>
+        <button id="exportBtn">Export</button>
+        <label class="file-import">
+          <input id="importInput" type="file" accept=".json,.csv" />
+          Import
+        </label>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Summary cards -->
+      <section class="grid summary">
+        <article class="card">
+          <h2>Balance</h2>
+          <p class="figure" id="balance">₵0</p>
+          <p class="sub" id="balanceSub">Net of all transactions</p>
+        </article>
+        <article class="card">
+          <h2>Total income</h2>
+          <p class="figure pos" id="totalIncome">₵0</p>
+          <p class="sub">All credits</p>
+        </article>
+        <article class="card">
+          <h2>Total expenses</h2>
+          <p class="figure neg" id="totalExpenses">₵0</p>
+          <p class="sub">All debits</p>
+        </article>
+      </section>
+
+      <!-- Budgets -->
+      <section class="card">
+        <div class="section-header">
+          <h2>Budgets</h2>
+          <button id="editBudgetsBtn">Edit budgets</button>
+        </div>
+        <div id="budgetsList" class="budgets"></div>
+      </section>
+
+      <!-- Charts -->
+      <section class="grid charts">
+        <article class="card">
+          <h2>Category distribution</h2>
+          <canvas id="categoryChart" height="220"></canvas>
+        </article>
+        <article class="card">
+          <h2>Monthly trend</h2>
+          <canvas id="monthlyChart" height="220"></canvas>
+        </article>
+      </section>
+
+      <!-- Controls -->
+      <section class="card">
+        <div class="section-header">
+          <h2>Add transaction</h2>
+        </div>
+        <form id="txnForm" class="form-grid" autocomplete="off">
+          <div>
+            <label>Description</label>
+            <input
+              id="desc"
+              type="text"
+              required
+              placeholder="e.g., Internet bill"
+            />
+          </div>
+          <div>
+            <label>Amount (GHS)</label>
+            <input
+              id="amount"
+              type="number"
+              step="0.01"
+              required
+              placeholder="e.g., 120"
+            />
+          </div>
+          <div>
+            <label for="type">Type</label>
+            <select id="type" required>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+          <div>
+            <label>Category</label>
+            <select id="category" title="Transaction category" required>
+              <option value="Salary">Salary</option>
+              <option value="Business">Business</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Rent">Rent</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Savings">Savings</option>
+              <option value="Misc">Misc</option>
+            </select>
+          </div>
+          <div>
+            <label>Date</label>
+            <input id="date" type="date" required title="Transaction date" />
+          </div>
+          <div>
+            <button type="submit" class="primary">Add</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Filters -->
+      <section class="card">
+        <div class="section-header">
+          <h2>Filters</h2>
+          <button id="clearFiltersBtn">Clear</button>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>Search</label>
+            <input id="search" type="text" placeholder="Find by description" />
+          </div>
+          <div>
+            <label for="filterCategory">Category</label>
+            <select id="filterCategory">
+              <option value="">All</option>
+              <option value="Salary">Salary</option>
+              <option value="Business">Business</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Rent">Rent</option>
+              <option value="Utilities">Utilities</option>
+              <option value="Savings">Savings</option>
+              <option value="Misc">Misc</option>
+            </select>
+          </div>
+          <div>
+            <label>Type</label>
+            <select id="filterType" title="Filter by transaction type">
+              <option value="">All</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+          <div>
+            <label>From</label>
+            <input id="fromDate" type="date" title="Start date filter" />
+          </div>
+          <div>
+            <label>To</label>
+            <input id="toDate" type="date" title="End date filter" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Transactions -->
+      <section class="card">
+        <div class="section-header">
+          <h2>Transactions</h2>
+          <div class="table-actions">
+            <button id="deleteSelectedBtn" class="danger">
+              Delete selected
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table" aria-label="Transactions">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    id="selectAll"
+                    aria-label="Select all"
+                  />
+                </th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="txnTableBody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer" id="tableFooter"></div>
+      </section>
+    </main>
+
+    <!-- Budgets modal -->
+    <dialog id="budgetsDialog">
+      <form method="dialog" class="dialog-card">
+        <h3>Edit budgets</h3>
+        <div id="budgetsEditor" class="form-grid"></div>
+        <menu class="dialog-actions">
+          <button type="button" value="cancel">Cancel</button>
+          <button
+            id="saveBudgetsBtn"
+            type="submit"
+            value="default"
+            class="primary"
+          >
+            Save
+          </button>
+        </menu>
+      </form>
+    </dialog>
+
+    <footer class="app-footer">
+      <small
+        >Built for a professional demo — Vanilla JS, Chart.js,
+        LocalStorage.</small
+      >
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
